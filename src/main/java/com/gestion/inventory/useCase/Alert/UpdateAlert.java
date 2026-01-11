@@ -14,6 +14,9 @@ public class UpdateAlert {
         Alert alertUpdate=alertService.getById(id);
         alertUpdate.setResultado(alertRequest.getResultado());
         alertUpdate.setDescripcion(alertRequest.getDescripcion());
+        alertUpdate.setEstado(alertRequest.getEstado());
+        alertUpdate.setStockActual(alertRequest.getStockActual());
+        alertUpdate.setStockMinimo(alertRequest.getStockMinimo());
         return alertService.save(alertUpdate);
     }
 }

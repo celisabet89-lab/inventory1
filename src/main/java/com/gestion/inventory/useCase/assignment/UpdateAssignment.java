@@ -13,5 +13,8 @@ public class UpdateAssignment {
     public Assignment execute(Long id, AssignmentRequets assignmentRequets) {
     Assignment assignmentUpdate=assignmentService.getById(id);
         assignmentUpdate.setDatos(assignmentRequets.getDatos());
+        assignmentUpdate.setFotosUrls(assignmentRequets.getFotosUrls());
+        assignmentUpdate.setChecklistCompletado(assignmentRequets.getChecklistCompletado());
+        assignmentUpdate.setItemsChecklist(assignmentRequets.getItemsChecklist());
         return assignmentService.save(assignmentUpdate);}
 }

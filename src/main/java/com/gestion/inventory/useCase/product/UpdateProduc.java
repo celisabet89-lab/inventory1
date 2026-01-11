@@ -19,6 +19,8 @@ public class UpdateProduc {
         productUpdete.setFoto(productRequest.getFoto());
         productUpdete.setPrecio(productRequest.getPrecio());
         productUpdete.setCategoria(productRequest.getCategoria());
+        productUpdete.setCodigoBarras(productRequest.getCodigoBarras());
+        productUpdete.setCodigoQR(productRequest.getCodigoQR());
         return productService.save(productUpdete);
     }
 }

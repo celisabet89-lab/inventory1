@@ -17,6 +17,9 @@ public class Assignment {
     private Long id;
     Date fecha;
     String datos;
+    String fotosUrls;
+    Boolean checklistCompletado = false;
+    String itemsChecklist;
     @ManyToOne
     @JoinColumn(name = "onuId")
     private Onu onu;

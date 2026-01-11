@@ -13,4 +13,5 @@ public class OnuRequest {
     String observaciones;
     String estado;
     Long contrato;
+    String codigoQR;
 }

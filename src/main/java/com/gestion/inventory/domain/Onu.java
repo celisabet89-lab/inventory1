@@ -21,7 +21,7 @@ public class Onu {
     String observaciones;
     String estado;
     Long contrato;
-
+    String codigoQR;
     @ManyToOne
     @JoinColumn(name = "clienteId")
     private Cliente cliente;

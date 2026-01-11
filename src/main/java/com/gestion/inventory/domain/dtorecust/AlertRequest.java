@@ -1,14 +1,18 @@
 package com.gestion.inventory.domain.dtorecust;
-
-import java.sql.Date;
-
+import com.gestion.inventory.domain.Alert;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class AlertRequest {
+
     String resultado;
     String descripcion;
-    Date fecha;
+    Alert.AlertStatus estado;
+    Integer stockActual;
+    Integer stockMinimo;
+    Long productId;
+    Long clienteId;
+    Long onuId;
 }

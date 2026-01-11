@@ -4,30 +4,45 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Date;
 import java.time.LocalDate;
-
 
 @Getter
 @Setter
 @Entity
+@Table(name = "alerts")
 public class Alert {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_alert")
     private Long idAlert;
-
     String resultado;
     String descripcion;
-    Date fecha;
-    @ManyToOne
-    @JoinColumn(name = "clienteId")
+    LocalDate fecha;
+    @Enumerated(EnumType.STRING)
+    AlertStatus estado = AlertStatus.PENDIENTE;
+    Integer stockActual;
+    Integer stockMinimo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
-    @ManyToOne
-    @JoinColumn(name = "onuId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "onu_id")
     private Onu onu;
 
     @PrePersist
     protected void onCreate() {
-        this.fecha = java.sql.Date.valueOf(LocalDate.now());}
+        this.fecha = LocalDate.now();
+    }
+
+    public enum AlertStatus {
+        PENDIENTE,
+        GESTIONADA
+    }
 }

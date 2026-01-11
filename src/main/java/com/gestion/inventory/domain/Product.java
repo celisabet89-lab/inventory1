@@ -21,6 +21,7 @@ public class Product {
     String foto;
     BigDecimal precio;
     String categoria;
-
+    String codigoBarras;
+    String codigoQR;
 
 }

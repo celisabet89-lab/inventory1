@@ -14,6 +14,7 @@ public class UpdateRol {
     public Rol execute(Long id, RolRequest rolRequest){
         Rol rolUpdate= rolService.getById(id);
         rolUpdate.setCargo(rolRequest.getCargo());
+
         return rolService.save(rolUpdate);
     }
 }

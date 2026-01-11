@@ -19,6 +19,7 @@ public class UpdateOnu {
         onuUpdate.setObservaciones(onuRequest.getObservaciones());
         onuUpdate.setEstado(onuRequest.getEstado());
         onuUpdate.setContrato(onuRequest.getContrato());
+        onuUpdate.setCodigoQR(onuRequest.getCodigoQR());
         return onuservice.save(onuUpdate);
     }
 }

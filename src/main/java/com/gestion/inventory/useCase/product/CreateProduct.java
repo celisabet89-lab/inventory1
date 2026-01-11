@@ -20,6 +20,8 @@ public class CreateProduct {
         product.setFoto(productRequest.getFoto());
         product.setPrecio(productRequest.getPrecio());
         product.setCategoria(productRequest.getCategoria());
+        product.setCodigoBarras(productRequest.getCodigoBarras());
+        product.setCodigoQR(productRequest.getCodigoQR());
         return productService.save(product);
 
         

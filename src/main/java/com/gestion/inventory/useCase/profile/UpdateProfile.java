@@ -18,6 +18,7 @@ public class UpdateProfile {
         profileUpdate.setTelefono(profilerRequest.getTelefono());
         profileUpdate.setCi(profilerRequest.getCi());
         profileUpdate.setCargo(profilerRequest.getCargo());
+
         return profileService.save(profileUpdate);
     }
 }

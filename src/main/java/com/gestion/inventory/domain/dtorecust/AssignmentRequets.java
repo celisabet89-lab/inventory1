@@ -8,4 +8,7 @@ import lombok.Setter;
 public class AssignmentRequets {
     Date fecha;
     String datos;
+    String fotosUrls;
+    String itemsChecklist;
+    Boolean checklistCompletado;
 }

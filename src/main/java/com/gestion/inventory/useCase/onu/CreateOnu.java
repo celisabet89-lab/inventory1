@@ -20,6 +20,7 @@ public class CreateOnu {
         onu.setObservaciones(onuRequest.getObservaciones());
         onu.setEstado(onuRequest.getEstado());
         onu.setContrato(onuRequest.getContrato());
+        onu.setCodigoQR(onuRequest.getCodigoQR());
         return onuservice.save(onu);
     }
 }

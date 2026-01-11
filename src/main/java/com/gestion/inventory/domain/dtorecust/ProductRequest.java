@@ -14,5 +14,6 @@ public class ProductRequest {
     String foto;
     BigDecimal precio;
     String categoria;
-
+    String codigoBarras;
+    String codigoQR;
 }

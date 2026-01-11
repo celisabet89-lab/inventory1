@@ -18,6 +18,8 @@ public class CreateProfile {
         profile.setTelefono(profileRequest.getTelefono());
         profile.setCi(profileRequest.getCi());
         profile.setCargo(profileRequest.getCargo());
+
         return profileService.save(profile);
+
     }
 }

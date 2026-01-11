@@ -14,6 +14,10 @@ public class CreateAssignment {
         Assignment assignment = new Assignment();
         assignment.setFecha(assignmentRequets.getFecha());
         assignment.setDatos(assignmentRequets.getDatos());
+        assignment.setFotosUrls(assignmentRequets.getFotosUrls());
+        assignment.setChecklistCompletado(assignmentRequets.getChecklistCompletado());
+        assignment.setItemsChecklist(assignmentRequets.getItemsChecklist());
+
         return assignmentService.save(assignment);
     }
 }

@@ -14,6 +14,7 @@ public class CreateRol {
     public Rol execute(RolRequest rolRequest){
         Rol rol=new Rol();
         rol.setCargo(rolRequest.getCargo());
+
         return rolService.save(rol);
     }
 }
