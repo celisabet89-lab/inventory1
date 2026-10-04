@@ -1,4 +1,4 @@
-package com.gestion.inventory.sevice;
+package com.gestion.inventory.useCase.sevice;
 
 import com.gestion.inventory.domain.Alert;
 import com.gestion.inventory.repository.AlertRepository;
@@ -16,7 +16,6 @@ public class AlertServiceIpm implements IAlertService {
     public List<Alert> getAll() {
         return alertRepository.findAll();
     }
-
     @Override
     public Alert getById(Long id) {
         return alertRepository.findById(id).orElse(null);

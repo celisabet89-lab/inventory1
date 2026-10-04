@@ -1,4 +1,4 @@
-package com.gestion.inventory.sevice;
+package com.gestion.inventory.useCase.sevice;
 
 import com.gestion.inventory.domain.Alert;
 

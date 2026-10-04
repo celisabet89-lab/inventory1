@@ -1,6 +1,6 @@
-package com.gestion.inventory.sevice;
+package com.gestion.inventory.useCase.sevice;
 
-import java.util.List;
+import  java.util.List;
 
 import com.gestion.inventory.domain.Profile;
 
