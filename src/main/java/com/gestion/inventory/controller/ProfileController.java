@@ -11,6 +11,7 @@ import com.gestion.inventory.useCase.profile.*;
 
 @RestController
 @RequestMapping("/api/profile")
+@CrossOrigin(origins = "http://localhost:4200")
 public class ProfileController {
     @Autowired
     CreateProfile createProfile;

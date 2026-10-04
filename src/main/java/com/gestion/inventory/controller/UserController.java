@@ -1,42 +1,28 @@
 package com.gestion.inventory.controller;
 
-import java.util.List;
-
 import com.gestion.inventory.domain.User;
 import com.gestion.inventory.domain.dtorecust.UserRequest;
-
-import lombok.RequiredArgsConstructor;
+import com.gestion.inventory.useCase.User.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import com.gestion.inventory.useCase.User.CreateUser;
-import com.gestion.inventory.useCase.User.DeleteUser;
-import com.gestion.inventory.useCase.User.GetAllUser;
-import com.gestion.inventory.useCase.User.GetUser;
-import com.gestion.inventory.useCase.User.UpdateUser;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
-public class UserController { 
-    @Autowired
-    CreateUser createUser;
-    @Autowired
-    DeleteUser deleteUser;
-    @Autowired
-    GetAllUser getAllUser;
-    @Autowired
-    GetUser getUser;
-    @Autowired
-    UpdateUser updateUser;
+@CrossOrigin(origins = "*")   // FIX: faltaba CrossOrigin
+public class UserController {
+
+    @Autowired CreateUser createUser;
+    @Autowired DeleteUser deleteUser;
+    @Autowired GetAllUser getAllUser;
+    @Autowired GetUser getUser;
+    @Autowired UpdateUser updateUser;
 
     @GetMapping
-    public List<User> getAll(){
-        return getAllUser.execute();
-    }
+    public List<User> getAll() { return getAllUser.execute(); }
+
     @GetMapping("/{idUser}")
-    public User getById(@PathVariable("idUser") Long idUser) {
-        return getUser.execute(idUser);
-    }
+    public User getById(@PathVariable Long idUser) { return getUser.execute(idUser); }
 
     @PostMapping
     public User save(@RequestBody UserRequest userRequest) {
@@ -49,8 +35,5 @@ public class UserController {
     }
 
     @DeleteMapping("/{idUser}")
-    public void deleteById(@PathVariable Long idUser) {
-        deleteUser.execute(idUser);
-    }
-    
+    public void deleteById(@PathVariable Long idUser) { deleteUser.execute(idUser); }
 }

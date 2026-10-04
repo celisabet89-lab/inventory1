@@ -1,4 +1,4 @@
-package com.gestion.inventory.useCase.sevice;
+package com.gestion.inventory.sevice;
 
 import com.gestion.inventory.domain.User;
 import com.gestion.inventory.repository.UserRepository;

@@ -21,6 +21,8 @@ public class CreateOnu {
         onu.setEstado(onuRequest.getEstado());
         onu.setContrato(onuRequest.getContrato());
         onu.setCodigoQR(onuRequest.getCodigoQR());
+        onu.setTipoPortador(onuRequest.getTipoPortador());
+        onu.setPortador(onuRequest.getPortador());
         return onuservice.save(onu);
     }
 }

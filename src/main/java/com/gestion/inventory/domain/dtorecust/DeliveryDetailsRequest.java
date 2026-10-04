@@ -3,8 +3,8 @@ package com.gestion.inventory.domain.dtorecust;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
-@Getter
+@Getter @Setter
 public class DeliveryDetailsRequest {
-    Integer cantidad;
+    private Long    productId;
+    private Integer cantidad;
 }

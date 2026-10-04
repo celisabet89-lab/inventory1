@@ -5,42 +5,33 @@ import com.gestion.inventory.domain.dtorecust.ClienteRequest;
 import com.gestion.inventory.useCase.cliente.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/cliente")
+@CrossOrigin(origins = "*")   // FIX: permite 192.168.0.103:4200
 public class ClienteController {
-    @Autowired
-    GetAllCliente getAllCliente;
-    @Autowired
-    GetCliente getCliente;
-    @Autowired
-    CreateCliente createCliente;
-    @Autowired
-    UpdateCliente updateCliente;
-    @Autowired
-    DeleteCliente deleteCliente;
+
+    @Autowired CreateCliente createCliente;
+    @Autowired UpdateCliente updateCliente;
+    @Autowired DeleteCliente deleteCliente;
+    @Autowired GetAllCliente getAllCliente;
+    @Autowired GetCliente    getCliente;
 
     @GetMapping
-    public List<Cliente> getAll(){
-        return getAllCliente.execute();
-    }
+    public List<Cliente> getAll() { return getAllCliente.execute(); }
+
     @GetMapping("/{idCliente}")
-    public Cliente getById(@PathVariable("idCliente") Long idCliente) {
-        return getCliente.execute(idCliente);
-    }
+    public Cliente getById(@PathVariable Long idCliente) { return getCliente.execute(idCliente); }
+
     @PostMapping
-    public Cliente save(@RequestBody ClienteRequest clienteRequest) {
-        return createCliente.execute(clienteRequest);
-    }
+    public Cliente save(@RequestBody ClienteRequest req) { return createCliente.execute(req); }
 
     @PutMapping("/{idCliente}")
-    public Cliente update(@PathVariable("idCliente") Long idCliente, @RequestBody ClienteRequest clienteRequest) {return  updateCliente.execute(idCliente, clienteRequest);}
-
+    public Cliente update(@PathVariable Long idCliente, @RequestBody ClienteRequest req) {
+        return updateCliente.execute(idCliente, req);
+    }
 
     @DeleteMapping("/{idCliente}")
-    public void deleteById(@PathVariable Long idCliente) {
-        deleteCliente.execute(idCliente);
-    }
+    public void deleteById(@PathVariable Long idCliente) { deleteCliente.execute(idCliente); }
 }

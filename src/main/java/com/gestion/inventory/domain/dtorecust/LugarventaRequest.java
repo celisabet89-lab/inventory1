@@ -1,4 +1,10 @@
 package com.gestion.inventory.domain.dtorecust;
 
-public class Lugarventarequest {
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter @Getter
+public class LugarventaRequest {
+    private String nombre;
 }
+

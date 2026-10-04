@@ -3,8 +3,8 @@ package com.gestion.inventory.domain.dtorecust;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
+@Setter
 public class OnuRequest {
     String marca;
     String modelo;
@@ -14,4 +14,6 @@ public class OnuRequest {
     String estado;
     Long contrato;
     String codigoQR;
+    String tipoPortador;
+    String portador;
 }

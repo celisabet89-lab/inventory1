@@ -1,63 +1,45 @@
-package com.gestion.inventory.useCase.sevice;
+package com.gestion.inventory.sevice;
 
 import com.gestion.inventory.domain.Alert;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailNotificationService {
-    private final JavaMailSender mailSender;
-    @Value("${app.email.compras}")
-    private String emailCompras;
-    @Value("${app.email.gerencia}")
-    private String emailGerencia;
-    @Value("${app.email.from}")
-    private String emailFrom;
 
-    public EmailNotificationService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
+
+    public void sendStockAlert(String to, String producto, int stockActual, int stockMinimo) {
+        if (mailSender == null) {
+            System.out.println("⚠️ Email no configurado. Alerta para: " + to + " | Producto: " + producto);
+            return;
+        }
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject("⚠️ Alerta de Stock: " + producto);
+            helper.setText(
+                    "<h2>Alerta de Stock Bajo</h2>" +
+                            "<p><b>Producto:</b> " + producto + "</p>" +
+                            "<p><b>Stock actual:</b> " + stockActual + "</p>" +
+                            "<p><b>Stock mínimo:</b> " + stockMinimo + "</p>" +
+                            "<p>Por favor gestiona el pedido dentro de las próximas 24 horas.</p>",
+                    true
+            );
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Error enviando email: " + e.getMessage());
+        }
     }
 
-    public void enviarAlertaStockCritico(Alert alerta) {
-        SimpleMailMessage mensaje = new SimpleMailMessage();
-        mensaje.setFrom(emailFrom);
-        mensaje.setTo(emailCompras, emailGerencia);
-        mensaje.setSubject("⚠️ ALERTA CRÍTICA: Stock Bajo - "
-                + alerta.getProduct().getArticulo());
-
-        mensaje.setText(String.format(
-                "ALERTA DE INVENTARIO - ACCIÓN REQUERIDA EN 24 HORAS\n\n"
-                        + "Producto: %s\n"
-                        + "Código: %s\n"
-                        + "Stock Actual: %d unidades\n"
-                        + "Stock Mínimo: %d unidades\n"
-                        + "Nivel Crítico (90%% mínimo): %d unidades\n\n"
-                        + "DESCRIPCIÓN:\n%s\n\n"
-                        + "ACCIÓN REQUERIDA:\n"
-                        + "Gestionar orden de compra en las próximas 24 horas.\n\n"
-                        + "Fecha de Detección: %s\n"
-                        + "ID de Alerta: %d\n\n"
-                        + "Este mensaje es automático. No responder.",
-                alerta.getProduct().getArticulo(),
-                alerta.getProduct().getCodigoBarras() != null
-                        ? alerta.getProduct().getCodigoBarras() : "N/A",
-                alerta.getStockActual(),
-                alerta.getStockMinimo(),
-                (int) (alerta.getStockMinimo() * 0.9),
-                alerta.getDescripcion(),
-                alerta.getFecha(),
-                alerta.getIdAlert()
-        ));
-
-        try {
-            mailSender.send(mensaje);
-            System.out.println("✅ Email de alerta enviado para: "
-                    + alerta.getProduct().getArticulo());
-        } catch (Exception e) {
-            System.err.println("❌ Error enviando email de alerta: " + e.getMessage());
-        }
+    public void enviarAlertaStockCritico(Alert alertaGuardada) {
     }
 }

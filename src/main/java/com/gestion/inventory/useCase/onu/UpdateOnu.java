@@ -20,6 +20,8 @@ public class UpdateOnu {
         onuUpdate.setEstado(onuRequest.getEstado());
         onuUpdate.setContrato(onuRequest.getContrato());
         onuUpdate.setCodigoQR(onuRequest.getCodigoQR());
+        onuUpdate.setTipoPortador(onuRequest.getTipoPortador());
+        onuUpdate.setPortador(onuRequest.getPortador());
         return onuservice.save(onuUpdate);
     }
 }

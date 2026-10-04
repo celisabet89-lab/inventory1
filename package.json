@@ -12,6 +12,7 @@
     "jspdf-autotable": "^5.0.7",
     "ng2-charts": "^8.0.0",
     "sweetalert2": "^11.26.17",
+    "translate": "^3.1.0",
     "xlsx": "^0.18.5"
   }
 }

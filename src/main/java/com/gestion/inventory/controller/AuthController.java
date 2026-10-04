@@ -2,43 +2,40 @@ package com.gestion.inventory.controller;
 
 import com.gestion.inventory.domain.User;
 import com.gestion.inventory.domain.dtorecust.UserRequest;
-import com.gestion.inventory.repository.UserRepository;
+import com.gestion.inventory.sevice.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class AuthController {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private IUserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password");
+    public User login(@RequestBody UserRequest req) {
+        List<User> todos = userService.getAll();
 
-        User user = (User) userRepository.findByEmail(email)
-                .orElse(null);
+        User user = todos.stream()
+                .filter(u -> u.getEmail() != null
+                        && u.getEmail().equalsIgnoreCase(req.getEmail()))
+                .findFirst()
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
 
-        if (user == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Usuario no encontrado");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-        }
+        String stored = user.getPassword();
+        String input  = req.getPassword();
 
-        if (!user.getPassword().equals(password)) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Contraseña incorrecta");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-        }
+        // Comparación directa en texto plano — sin BCrypt
+        if (stored == null || !stored.equals(input))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Contraseña incorrecta");
+
         user.setPassword(null);
-        return ResponseEntity.ok(user);
+        return user;
     }
 }

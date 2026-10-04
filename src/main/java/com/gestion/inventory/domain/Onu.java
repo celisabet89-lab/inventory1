@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
+@Entity
 @Getter
 @Setter
-@Entity
 public class Onu {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,6 +21,9 @@ public class Onu {
     String estado;
     Long contrato;
     String codigoQR;
+    String tipoPortador;
+    String portador;
+
     @ManyToOne
     @JoinColumn(name = "clienteId")
     private Cliente cliente;
