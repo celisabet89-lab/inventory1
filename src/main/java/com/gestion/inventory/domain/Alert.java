@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter @Setter
 @Entity
@@ -18,7 +19,7 @@ public class Alert {
 
     String resultado;
     String descripcion;
-    LocalDate fecha;
+    LocalDateTime fecha;
 
     @Enumerated(EnumType.STRING)
     AlertStatus estado = AlertStatus.PENDIENTE;
@@ -43,7 +44,7 @@ public class Alert {
 
     @PrePersist
     protected void onCreate() {
-        if (this.fecha == null) this.fecha = LocalDate.now();
+        if (this.fecha == null) this.fecha = LocalDateTime.now();
     }
 
     public enum AlertStatus { PENDIENTE, GESTIONADA }

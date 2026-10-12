@@ -8,7 +8,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -20,118 +21,583 @@ public class SupplierEmailService {
     @Value("${spring.mail.username:}")
     private String fromEmail;
 
-    public void sendOrderEmail(SupplierOrderRequest req) {
-        if (mailSender == null || fromEmail.isBlank()) {
-            System.out.println("⚠️ Email no configurado — pedido no enviado");
-            return;
+    public void sendOrderEmail(
+            SupplierOrderRequest req
+    ) {
+
+        if (
+                mailSender == null ||
+                        fromEmail == null ||
+                        fromEmail.isBlank()
+        ) {
+
+            throw new RuntimeException(
+                    "El servicio de correo no está configurado en el backend."
+            );
         }
+
         try {
-            MimeMessage msg = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
+
+            MimeMessage message =
+                    mailSender.createMimeMessage();
+
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(
+                            message,
+                            true,
+                            "UTF-8"
+                    );
 
             helper.setFrom(fromEmail);
-            helper.setTo(req.getSupplierEmail());
-            helper.setSubject("📦 Pedido de Stock — " + req.getProductoNombre());
-            helper.setText(buildHtml(req), true);
 
-            mailSender.send(msg);
-            System.out.println("✉️ Pedido enviado a proveedor: " + req.getSupplierEmail());
+            helper.setTo(
+                    req.getSupplierEmail()
+            );
+
+            helper.setSubject(
+                    "Pedido de reposición - SIN LIMITE"
+            );
+
+            helper.setText(
+                    buildHtml(req),
+                    true
+            );
+
+            mailSender.send(message);
+
+            System.out.println(
+                    "========================================"
+            );
+
+            System.out.println(
+                    "CORREO ENVIADO CORRECTAMENTE"
+            );
+
+            System.out.println(
+                    "Proveedor: " +
+                            req.getSupplierEmail()
+            );
+
+            System.out.println(
+                    "Producto: " +
+                            req.getProductoNombre()
+            );
+
+            System.out.println(
+                    "Cantidad: " +
+                            req.getCantidadPedida()
+            );
+
+            System.out.println(
+                    "========================================"
+            );
 
         } catch (Exception e) {
-            System.err.println("❌ Error enviando pedido a proveedor: " + e.getMessage());
-            throw new RuntimeException("No se pudo enviar el email al proveedor: " + e.getMessage());
+
+            System.err.println(
+                    "========================================"
+            );
+
+            System.err.println(
+                    "ERROR ENVIANDO CORREO"
+            );
+
+            System.err.println(
+                    e.getMessage()
+            );
+
+            System.err.println(
+                    "========================================"
+            );
+
+            throw new RuntimeException(
+                    "No se pudo enviar el pedido por correo: " +
+                            e.getMessage(),
+                    e
+            );
         }
     }
 
-    private String buildHtml(SupplierOrderRequest req) {
-        String fecha = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String proveedor = req.getSupplierName() != null && !req.getSupplierName().isBlank()
-                ? req.getSupplierName() : req.getSupplierEmail();
+    private String buildHtml(
+            SupplierOrderRequest req
+    ) {
+
+        String fecha =
+                LocalDateTime.now()
+                        .format(
+                                DateTimeFormatter.ofPattern(
+                                        "dd/MM/yyyy HH:mm"
+                                )
+                        );
+
+        String proveedor =
+                req.getSupplierName() != null &&
+                        !req.getSupplierName().isBlank()
+                        ? req.getSupplierName()
+                        : req.getSupplierEmail();
+
+        String producto =
+                req.getProductoNombre() != null &&
+                        !req.getProductoNombre().isBlank()
+                        ? req.getProductoNombre()
+                        : "Producto";
+
+        String observaciones =
+                req.getObservaciones() != null &&
+                        !req.getObservaciones().isBlank()
+                        ? req.getObservaciones()
+                        : "Sin observaciones";
+
+        String solicitadoPor =
+                req.getSolicitadoPor() != null &&
+                        !req.getSolicitadoPor().isBlank()
+                        ? req.getSolicitadoPor()
+                        : "Sistema";
 
         return """
             <!DOCTYPE html>
-            <html>
-            <body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;">
-              <table width="100%%" cellpadding="0" cellspacing="0">
-                <tr><td align="center" style="padding:30px 10px;">
-                  <table width="580" cellpadding="0" cellspacing="0"
-                         style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.08);">
+            <html lang="es">
 
-                    <!-- BANNER -->
-                    <tr><td style="background:linear-gradient(135deg,#1b6f6f,#0f4f4f);padding:30px 32px;">
-                      <div style="font-size:42px;text-align:center;">📦</div>
-                      <h1 style="color:#fff;text-align:center;margin:8px 0 0;font-size:22px;">
-                        ORDEN DE PEDIDO
-                      </h1>
-                      <p style="color:#a7f3d0;text-align:center;margin:6px 0 0;font-size:13px;">
-                        Sistema de Gestión de Inventario
-                      </p>
-                    </td></tr>
+            <head>
 
-                    <!-- CUERPO -->
-                    <tr><td style="padding:32px;">
+                <meta charset="UTF-8">
 
-                      <p style="color:#374151;font-size:15px;margin:0 0 24px;">
-                        Estimado/a <b>%s</b>,<br/>
-                        Le comunicamos que necesitamos realizar el siguiente pedido de reposición de stock:
-                      </p>
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1.0"
+                >
 
-                      <!-- TABLA DE PEDIDO -->
-                      <table width="100%%" cellpadding="0" cellspacing="0"
-                             style="background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;margin-bottom:24px;">
-                        <tr style="background:#1b6f6f;">
-                          <td colspan="2" style="padding:12px 20px;color:#fff;font-weight:700;font-size:14px;border-radius:8px 8px 0 0;">
-                            📋 Detalle del Pedido
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style="padding:12px 20px;color:#6b7280;font-size:13px;border-bottom:1px solid #e5e7eb;">Producto</td>
-                          <td style="padding:12px 20px;color:#111827;font-weight:700;font-size:14px;text-align:right;border-bottom:1px solid #e5e7eb;">%s</td>
-                        </tr>
-                        <tr>
-                          <td style="padding:12px 20px;color:#6b7280;font-size:13px;border-bottom:1px solid #e5e7eb;">Cantidad solicitada</td>
-                          <td style="padding:12px 20px;color:#1b6f6f;font-weight:700;font-size:20px;text-align:right;border-bottom:1px solid #e5e7eb;">%d unidades</td>
-                        </tr>
-                        <tr>
-                          <td style="padding:12px 20px;color:#6b7280;font-size:13px;border-bottom:1px solid #e5e7eb;">Fecha de solicitud</td>
-                          <td style="padding:12px 20px;color:#374151;font-size:13px;text-align:right;border-bottom:1px solid #e5e7eb;">%s</td>
-                        </tr>
-                        <tr>
-                          <td style="padding:12px 20px;color:#6b7280;font-size:13px;">Solicitado por</td>
-                          <td style="padding:12px 20px;color:#374151;font-size:13px;text-align:right;">%s</td>
-                        </tr>
-                      </table>
+                <title>
+                    Pedido de reposición
+                </title>
 
-                      %s
+            </head>
 
-                      <p style="color:#374151;font-size:14px;margin:0;">
-                        Por favor, confirme la disponibilidad y tiempo de entrega respondiendo a este correo.
-                      </p>
-                    </td></tr>
+            <body
+                style="
+                    margin:0;
+                    padding:0;
+                    background:#f3f4f6;
+                    font-family:Arial,Helvetica,sans-serif;
+                "
+            >
 
-                    <!-- FOOTER -->
-                    <tr><td style="background:#f9fafb;padding:16px 32px;border-top:1px solid #e5e7eb;text-align:center;">
-                      <p style="margin:0;color:#9ca3af;font-size:12px;">
-                        Sistema de Gestión de Inventario · Pedido generado automáticamente
-                      </p>
-                    </td></tr>
+                <table
+                    width="100%%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    border="0"
+                >
 
-                  </table>
-                </td></tr>
-              </table>
+                    <tr>
+
+                        <td
+                            align="center"
+                            style="padding:30px 15px;"
+                        >
+
+                            <table
+                                width="600"
+                                cellpadding="0"
+                                cellspacing="0"
+                                border="0"
+                                style="
+                                    max-width:600px;
+                                    width:100%%;
+                                    background:#ffffff;
+                                    border-radius:16px;
+                                    overflow:hidden;
+                                    box-shadow:0 8px 30px rgba(0,0,0,.10);
+                                "
+                            >
+
+                                <tr>
+
+                                    <td
+                                        style="
+                                            background:#0f766e;
+                                            padding:28px 30px;
+                                            text-align:center;
+                                        "
+                                    >
+
+                                        <div
+                                            style="
+                                                font-size:42px;
+                                                margin-bottom:8px;
+                                            "
+                                        >
+                                            📦
+                                        </div>
+
+                                        <h1
+                                            style="
+                                                margin:0;
+                                                color:#ffffff;
+                                                font-size:24px;
+                                                font-weight:700;
+                                            "
+                                        >
+                                            PEDIDO DE REPOSICIÓN
+                                        </h1>
+
+                                        <p
+                                            style="
+                                                margin:8px 0 0;
+                                                color:#ccfbf1;
+                                                font-size:13px;
+                                            "
+                                        >
+                                            SIN LIMITE
+                                        </p>
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td
+                                        style="
+                                            padding:30px;
+                                        "
+                                    >
+
+                                        <p
+                                            style="
+                                                margin:0 0 22px;
+                                                color:#374151;
+                                                font-size:15px;
+                                                line-height:1.6;
+                                            "
+                                        >
+
+                                            Estimado/a
+                                            <strong>
+                                                %s
+                                            </strong>,
+
+                                            <br>
+
+                                            Solicitamos la disponibilidad
+                                            del siguiente producto:
+
+                                        </p>
+
+
+                                        <table
+                                            width="100%%"
+                                            cellpadding="0"
+                                            cellspacing="0"
+                                            border="0"
+                                            style="
+                                                border:1px solid #dbe5e3;
+                                                border-radius:10px;
+                                                overflow:hidden;
+                                            "
+                                        >
+
+                                            <tr>
+
+                                                <td
+                                                    colspan="2"
+                                                    style="
+                                                        padding:13px 18px;
+                                                        background:#ecfdf9;
+                                                        color:#0f766e;
+                                                        font-size:14px;
+                                                        font-weight:700;
+                                                    "
+                                                >
+
+                                                    📋 Detalle del pedido
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr>
+
+                                                <td
+                                                    style="
+                                                        width:45%%;
+                                                        padding:13px 18px;
+                                                        color:#64748b;
+                                                        font-size:13px;
+                                                        border-top:1px solid #e5e7eb;
+                                                    "
+                                                >
+
+                                                    Producto
+
+                                                </td>
+
+                                                <td
+                                                    style="
+                                                        padding:13px 18px;
+                                                        color:#134e4a;
+                                                        font-size:14px;
+                                                        font-weight:700;
+                                                        text-align:right;
+                                                        border-top:1px solid #e5e7eb;
+                                                    "
+                                                >
+
+                                                    %s
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr>
+
+                                                <td
+                                                    style="
+                                                        padding:13px 18px;
+                                                        color:#64748b;
+                                                        font-size:13px;
+                                                        border-top:1px solid #e5e7eb;
+                                                    "
+                                                >
+
+                                                    Cantidad solicitada
+
+                                                </td>
+
+                                                <td
+                                                    style="
+                                                        padding:13px 18px;
+                                                        color:#0f766e;
+                                                        font-size:20px;
+                                                        font-weight:800;
+                                                        text-align:right;
+                                                        border-top:1px solid #e5e7eb;
+                                                    "
+                                                >
+
+                                                    %d unidades
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr>
+
+                                                <td
+                                                    style="
+                                                        padding:13px 18px;
+                                                        color:#64748b;
+                                                        font-size:13px;
+                                                        border-top:1px solid #e5e7eb;
+                                                    "
+                                                >
+
+                                                    Fecha
+
+                                                </td>
+
+                                                <td
+                                                    style="
+                                                        padding:13px 18px;
+                                                        color:#374151;
+                                                        font-size:13px;
+                                                        text-align:right;
+                                                        border-top:1px solid #e5e7eb;
+                                                    "
+                                                >
+
+                                                    %s
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <tr>
+
+                                                <td
+                                                    style="
+                                                        padding:13px 18px;
+                                                        color:#64748b;
+                                                        font-size:13px;
+                                                        border-top:1px solid #e5e7eb;
+                                                    "
+                                                >
+
+                                                    Solicitado por
+
+                                                </td>
+
+                                                <td
+                                                    style="
+                                                        padding:13px 18px;
+                                                        color:#374151;
+                                                        font-size:13px;
+                                                        text-align:right;
+                                                        border-top:1px solid #e5e7eb;
+                                                    "
+                                                >
+
+                                                    %s
+
+                                                </td>
+
+                                            </tr>
+
+                                        </table>
+
+
+                                        <div
+                                            style="
+                                                margin-top:22px;
+                                                padding:16px;
+                                                background:#f8fafc;
+                                                border-radius:10px;
+                                                border-left:4px solid #0f766e;
+                                            "
+                                        >
+
+                                            <p
+                                                style="
+                                                    margin:0 0 5px;
+                                                    color:#134e4a;
+                                                    font-size:13px;
+                                                    font-weight:700;
+                                                "
+                                            >
+
+                                                📝 Observaciones
+
+                                            </p>
+
+                                            <p
+                                                style="
+                                                    margin:0;
+                                                    color:#475569;
+                                                    font-size:13px;
+                                                    line-height:1.5;
+                                                "
+                                            >
+
+                                                %s
+
+                                            </p>
+
+                                        </div>
+
+
+                                        <div
+                                            style="
+                                                margin-top:24px;
+                                                padding:16px;
+                                                background:#f0fdfa;
+                                                border-radius:10px;
+                                                text-align:center;
+                                            "
+                                        >
+
+                                            <p
+                                                style="
+                                                    margin:0;
+                                                    color:#0f766e;
+                                                    font-size:14px;
+                                                    font-weight:700;
+                                                "
+                                            >
+
+                                                Por favor, confirme
+
+                                                disponibilidad
+
+                                                y tiempo de entrega.
+
+                                            </p>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td
+                                        style="
+                                            padding:18px 30px;
+                                            background:#f8fafc;
+                                            border-top:1px solid #e5e7eb;
+                                            text-align:center;
+                                        "
+                                    >
+
+                                        <p
+                                            style="
+                                                margin:0;
+                                                color:#94a3b8;
+                                                font-size:11px;
+                                            "
+                                        >
+
+                                            SIN LIMITE ·
+                                            Sistema de Gestión de Inventario
+
+                                        </p>
+
+                                        <p
+                                            style="
+                                                margin:5px 0 0;
+                                                color:#cbd5e1;
+                                                font-size:10px;
+                                            "
+                                        >
+
+                                            Pedido generado automáticamente
+
+                                        </p>
+
+                                    </td>
+
+                                </tr>
+
+                            </table>
+
+                        </td>
+
+                    </tr>
+
+                </table>
+
             </body>
+
             </html>
             """.formatted(
-                proveedor,
-                req.getProductoNombre(),
+                escaparHtml(proveedor),
+                escaparHtml(producto),
                 req.getCantidadPedida(),
                 fecha,
-                req.getSolicitadoPor() != null ? req.getSolicitadoPor() : "Sistema",
-                req.getObservaciones() != null && !req.getObservaciones().isBlank()
-                        ? "<div style='background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:20px;'>" +
-                        "<b style='color:#92400e;font-size:13px;'>📝 Observaciones:</b>" +
-                        "<p style='color:#78350f;font-size:13px;margin:4px 0 0;'>" + req.getObservaciones() + "</p></div>"
-                        : ""
+                escaparHtml(solicitadoPor),
+                escaparHtml(observaciones)
         );
+    }
+
+    private String escaparHtml(
+            String valor
+    ) {
+
+        if (valor == null) {
+            return "";
+        }
+
+        return valor
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#039;");
     }
 }

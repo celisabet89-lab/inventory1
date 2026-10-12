@@ -14,33 +14,99 @@ import java.util.Map;
 @Service
 public class SendSupplierOrder {
 
-    @Autowired private IAlertService       alertService;
-    @Autowired private SupplierEmailService supplierEmailService;
+    @Autowired
+    private IAlertService alertService;
 
-    public Map<String, Object> execute(SupplierOrderRequest req) {
-        // Validaciones básicas
-        if (req.getSupplierEmail() == null || req.getSupplierEmail().isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email del proveedor requerido");
-        if (req.getCantidadPedida() == null || req.getCantidadPedida() <= 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cantidad debe ser mayor a 0");
+    @Autowired
+    private SupplierEmailService supplierEmailService;
 
-        // Enviar email al proveedor
-        supplierEmailService.sendOrderEmail(req);
+    public Map<String, Object> execute(
+            SupplierOrderRequest req
+    ) {
 
-        // Marcar la alerta como GESTIONADA si se proporcionó alertId
-        if (req.getAlertId() != null) {
+        if (
+                req.getSupplierEmail() == null ||
+                        req.getSupplierEmail().isBlank()
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Email del proveedor requerido"
+            );
+        }
+
+        if (
+                req.getCantidadPedida() == null ||
+                        req.getCantidadPedida() <= 0
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "La cantidad debe ser mayor a 0"
+            );
+        }
+
+        if (
+                req.getProductoNombre() == null ||
+                        req.getProductoNombre().isBlank()
+        ) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "El producto es obligatorio"
+            );
+        }
+
+        try {
+
+            supplierEmailService.sendOrderEmail(req);
+
+        } catch (Exception e) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    e.getMessage(),
+                    e
+            );
+        }
+
+        if (
+                req.getAlertId() != null
+        ) {
+
             try {
-                Alert alerta = alertService.getById(req.getAlertId());
-                alerta.setEstado(Alert.AlertStatus.GESTIONADA);
-                alertService.save(alerta);
+
+                Alert alerta =
+                        alertService.getById(
+                                req.getAlertId()
+                        );
+
+                if (alerta != null) {
+
+                    alerta.setEstado(
+                            Alert.AlertStatus.GESTIONADA
+                    );
+
+                    alertService.save(
+                            alerta
+                    );
+                }
+
             } catch (Exception e) {
-                System.err.println("No se pudo marcar alerta como gestionada: " + e.getMessage());
+
+                System.err.println(
+                        "No se pudo actualizar la alerta: " +
+                                e.getMessage()
+                );
             }
         }
 
         return Map.of(
-                "success", true,
-                "message", "Pedido enviado a " + req.getSupplierEmail()
+                "success",
+                true,
+                "message",
+                "Pedido enviado correctamente a " +
+                        req.getSupplierEmail()
         );
     }
 }

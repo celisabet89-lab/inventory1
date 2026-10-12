@@ -4,36 +4,57 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.sql.Date;
-import java.time.LocalDate;
 
-@Setter
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Getter
+@Setter
 @Entity
+@Table(name = "movements")
 public class Movements {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long idMovements;
-
     Integer cantidad;
-    Date    fecha;
-    String  tipo;
-    String  responsable;
-    String  observaciones;
-
+    LocalDateTime fecha;
+    String tipo;
+    String responsable;
+    @Column(columnDefinition = "TEXT")
+    String observaciones;
+    String codigo;
+    String formaPago;
+    String estadoPago;
+    @Column(length = 20)
+    String estadoMovimiento;
+    BigDecimal total;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "userId")
-    @JsonIgnoreProperties({"hibernateLazyInitializer","handler","password"})
-    private User user;
-
+    @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({
+            "hibernateLazyInitializer",
+            "handler",
+            "password"
+    })
+    User user;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "productId")
-    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-    private Product product;
-
+    @JoinColumn(name = "product_id")
+    @JsonIgnoreProperties({
+            "hibernateLazyInitializer",
+            "handler"
+    })
+    Product product;
     @PrePersist
     protected void onCreate() {
-        if (this.fecha == null) this.fecha = Date.valueOf(LocalDate.now());
+        if (this.fecha == null) {
+            this.fecha = LocalDateTime.now();
+        }
+
+        if (
+                this.estadoMovimiento == null ||
+                        this.estadoMovimiento.trim().isEmpty()
+        ) {
+            this.estadoMovimiento = "ACTIVO";
+        }
     }
 }

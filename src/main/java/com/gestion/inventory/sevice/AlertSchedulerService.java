@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 @Service
 public class AlertSchedulerService {
@@ -77,7 +78,7 @@ public class AlertSchedulerService {
         nuevaAlerta.setEstado(Alert.AlertStatus.PENDIENTE);
         nuevaAlerta.setStockActual(stock.getStockACtual());
         nuevaAlerta.setStockMinimo(stock.getStockMinimo());
-        nuevaAlerta.setFecha(LocalDate.now());
+        nuevaAlerta.setFecha(LocalDateTime.now());
 
         // Guardar la alerta
         Alert alertaGuardada = alertRepository.save(nuevaAlerta);

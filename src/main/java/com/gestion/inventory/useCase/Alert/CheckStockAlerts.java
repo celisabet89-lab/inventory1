@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class CheckStockAlerts {
                     alerta.setStockActual(actual);
                     alerta.setStockMinimo(minimo);
                     alerta.setEstado(Alert.AlertStatus.PENDIENTE);
-                    alerta.setFecha(LocalDate.now());
+                    alerta.setFecha(LocalDateTime.now());
 
                     if (actual == 0) {
                         alerta.setResultado("CRÍTICO");

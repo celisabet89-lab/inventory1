@@ -8,15 +8,26 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
+    public void addCorsMappings(
+            CorsRegistry registry
+    ) {
+
+        registry
+                .addMapping("/**")
                 .allowedOriginPatterns(
-                        "http://192.168.0.103:4200",  // Angular en la red local
-                        "http://192.168.0.1:4200",    // Desde el router
-                        "http://localhost:4200",       // Desarrollo local
-                        "http://127.0.0.1:4200"
+                        "http://localhost:4200",
+                        "http://127.0.0.1:4200",
+                        "http://192.168.0.103:4200",
+                        "http://192.168.0.1:4200"
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedMethods(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "PATCH",
+                        "OPTIONS"
+                )
                 .allowedHeaders("*")
                 .allowCredentials(false)
                 .maxAge(3600);
