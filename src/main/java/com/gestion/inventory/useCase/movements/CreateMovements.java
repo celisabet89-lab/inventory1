@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.math.BigDecimal;
 
 @Service
@@ -26,78 +27,63 @@ public class CreateMovements {
     ExistingRepository existingRepository;
     @Autowired
     UserRepository userRepository;
-
     @Transactional
     public Movements execute(MovementsRequest r) {
         if (r.getIdProducto() == null) {
-
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "El producto es obligatorio");}
-        Product producto =
-                productService.getById(r.getIdProducto());
+                    "El producto es obligatorio");
+        }
+        Product producto = productService.getById(r.getIdProducto());
         if (producto == null) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "Producto no encontrado: " + r.getIdProducto());
         }
-        String tipo =
-                r.getTipo() != null
-                        ? r.getTipo().trim().toUpperCase()
-                        : "ENTRADA";
-        if (
-                !tipo.equals("ENTRADA") &&
-                        !tipo.equals("SALIDA")) {
+        String tipo = r.getTipo() != null
+                ? r.getTipo().trim().toUpperCase()
+                : "ENTRADA";
+        if (!tipo.equals("ENTRADA") && !tipo.equals("SALIDA")) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Tipo inválido. Usar: ENTRADA o SALIDA"
-            );
+                    "Tipo inválido. Usar: ENTRADA o SALIDA");
         }
-        int cantidad =
-                r.getCantidad() != null
-                        ? r.getCantidad()
-                        : 0;
+        int cantidad = r.getCantidad() != null
+                ? r.getCantidad()
+                : 0;
         if (cantidad <= 0) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "La cantidad debe ser mayor a 0");
         }
-        Existing stock =
-                existingRepository
-                        .findByProduct(producto)
-                        .orElseGet(() -> {
-                            Existing nuevo =
-                                    new Existing();
-                            nuevo.setProduct(producto);
-                            nuevo.setStockACtual(0);
-                            nuevo.setStockMinimo(5);
-                            return existingRepository.save(nuevo);
-                        });
-        int stockActual =
-                stock.getStockACtual() != null
-                        ? stock.getStockACtual()
-                        : 0;
-        if (
-                tipo.equals("SALIDA") &&
-                        stockActual < cantidad) {
+        Existing stock = existingRepository
+                .findByProduct(producto)
+                .orElseGet(() -> {
+                    Existing nuevo = new Existing();
+                    nuevo.setProduct(producto);
+                    nuevo.setStockACtual(0);
+                    nuevo.setStockMinimo(5);
+                    return existingRepository.save(nuevo);});
+        int stockActual = stock.getStockACtual() != null
+                ? stock.getStockACtual()
+                : 0;
+        if (tipo.equals("SALIDA") && stockActual < cantidad) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Stock insuficiente. Disponible: "
                             + stockActual
                             + ", Solicitado: "
-                            + cantidad
-            );
+                            + cantidad);
         }
-        int nuevoStock =
-                tipo.equals("ENTRADA")
-                        ? stockActual + cantidad
-                        : stockActual - cantidad;
+        int nuevoStock = tipo.equals("ENTRADA")
+                ? stockActual + cantidad
+                : stockActual - cantidad;
         stock.setStockACtual(nuevoStock);
         existingRepository.save(stock);
         producto.setUnidad(nuevoStock);
         productService.save(producto);
-        Movements mov =
-                new Movements();
+        Movements mov = new Movements();
+        mov.setProduct(producto);
         mov.setCantidad(cantidad);
         mov.setTipo(tipo);
         mov.setResponsable(
@@ -112,10 +98,8 @@ public class CreateMovements {
                 limpiar(r.getEstadoPago()));
         BigDecimal total = r.getTotal();
         if (total == null && producto.getPrecio() != null) {
-            total =
-                    producto.getPrecio()
-                            .multiply(
-                                    BigDecimal.valueOf(cantidad));
+            total = producto.getPrecio()
+                    .multiply(BigDecimal.valueOf(cantidad));
         }
         mov.setTotal(total);
         Long idUsuario = r.getUserId();
@@ -123,16 +107,15 @@ public class CreateMovements {
             idUsuario = r.getUsuario();
         }
         if (idUsuario != null) {
-            User usuario =
-                    userRepository
-                            .findById(idUsuario)
-                            .orElse(null);
+            User usuario = userRepository
+                    .findById(idUsuario)
+                    .orElse(null);
             if (usuario != null) {
-                mov.setUser(usuario);}
+                mov.setUser(usuario);
+            }
         }
         if (r.getFecha() != null) {
-            mov.setFecha(
-                    r.getFecha());
+            mov.setFecha(r.getFecha());
         }
         return movementsService.save(mov);
     }
@@ -141,8 +124,6 @@ public class CreateMovements {
             return null;
         }
         String limpio = valor.trim();
-        return limpio.isEmpty()
-                ? null
-                : limpio;
+        return limpio.isEmpty() ? null : limpio;
     }
 }
