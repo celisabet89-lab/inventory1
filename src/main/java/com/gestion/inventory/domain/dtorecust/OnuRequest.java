@@ -16,4 +16,5 @@ public class OnuRequest {
     String codigoQR;
     String tipoPortador;
     String portador;
+    String almacen;
 }

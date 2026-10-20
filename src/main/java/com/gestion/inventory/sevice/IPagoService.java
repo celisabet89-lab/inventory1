@@ -1,6 +1,5 @@
+
 package com.gestion.inventory.sevice;
-
-
 import com.gestion.inventory.domain.Pago;
 import com.gestion.inventory.domain.dtorecust.PagoRequest;
 

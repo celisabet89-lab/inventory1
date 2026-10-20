@@ -23,6 +23,7 @@ public class Onu {
     String codigoQR;
     String tipoPortador;
     String portador;
+    String almacen;
 
     @ManyToOne
     @JoinColumn(name = "clienteId")
