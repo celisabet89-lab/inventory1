@@ -11,6 +11,8 @@ import java.util.List;
 public interface AlertRepository extends JpaRepository<Alert, Long> {
     boolean existsByProductAndEstado(Product product, Alert.AlertStatus estado);
 
+    List<Alert> findByProductAndEstado(Product product, Alert.AlertStatus estado);
+
     List<Alert> findByEstado(Alert.AlertStatus estado);
 
     @Query("SELECT COUNT(a) FROM Alert a WHERE a.estado = :estado")

@@ -11,11 +11,14 @@ import com.gestion.inventory.sevice.IMovementsService;
 import com.gestion.inventory.sevice.IProductService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import com.gestion.inventory.sevice.StockSyncService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UpdateMovements {
+    @Autowired
+    StockSyncService stockSync;
 
     @Autowired
     IMovementsService movementsService;
@@ -73,6 +76,7 @@ public class UpdateMovements {
             }
             stock.setStockACtual(nuevoStock);
             existingRepository.save(stock);
+            stockSync.resolverAlertas(stock);
             Product producto =
                     mov.getProduct();
             producto.setUnidad(nuevoStock);

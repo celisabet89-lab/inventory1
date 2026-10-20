@@ -10,6 +10,7 @@ import com.gestion.inventory.repository.UserRepository;
 import com.gestion.inventory.sevice.IMovementsService;
 import com.gestion.inventory.sevice.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.gestion.inventory.sevice.StockSyncService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,8 @@ import java.math.BigDecimal;
 
 @Service
 public class CreateMovements {
+    @Autowired
+    StockSyncService stockSync;
     @Autowired
     IMovementsService movementsService;
     @Autowired
@@ -80,6 +83,7 @@ public class CreateMovements {
                 : stockActual - cantidad;
         stock.setStockACtual(nuevoStock);
         existingRepository.save(stock);
+        stockSync.resolverAlertas(stock);
         producto.setUnidad(nuevoStock);
         productService.save(producto);
         Movements mov = new Movements();

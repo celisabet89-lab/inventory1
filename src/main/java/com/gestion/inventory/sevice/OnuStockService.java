@@ -27,6 +27,7 @@ public class OnuStockService {
     @Autowired ProductRepository productRepository;
     @Autowired CategoriaRepository categoriaRepository;
     @Autowired UnidadMedidaRepository unidadMedidaRepository;
+    @Autowired StockSyncService stockSync;
 
     private String limpiar(String s) {
         return s == null ? "" : s.trim();
@@ -47,7 +48,9 @@ public class OnuStockService {
             p.setUnidadMedida(unidad());
         }
         p.setUnidad((p.getUnidad() == null ? 0 : p.getUnidad()) + 1);
-        return productRepository.save(p);
+        Product guardado = productRepository.save(p);
+        stockSync.desdeProducto(guardado);
+        return guardado;
     }
 
     /** Resta 1 (sin bajar de 0) al producto de la marca, si existe. */
@@ -57,7 +60,7 @@ public class OnuStockService {
         productRepository.findFirstByArticuloIgnoreCase(nombre).ifPresent(p -> {
             int actual = p.getUnidad() == null ? 0 : p.getUnidad();
             p.setUnidad(Math.max(0, actual - 1));
-            productRepository.save(p);
+            stockSync.desdeProducto(productRepository.save(p));
         });
     }
 

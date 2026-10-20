@@ -7,6 +7,7 @@ import com.gestion.inventory.domain.dtorecust.ProductRequest;
 import com.gestion.inventory.repository.CategoriaRepository;
 import com.gestion.inventory.repository.ProductRepository;
 import com.gestion.inventory.repository.UnidadMedidaRepository;
+import com.gestion.inventory.sevice.StockSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class CreateProduct {
     private final ProductRepository productRepository;
     private final CategoriaRepository categoriaRepository;
     private final UnidadMedidaRepository unidadMedidaRepository;
+    private final StockSyncService stockSync;
 
     @Transactional
     public Product execute(ProductRequest request) {
@@ -46,6 +48,8 @@ public class CreateProduct {
         product.setCategoria(categoria);
         product.setUnidadMedida(unidadMedida);
 
-        return productRepository.save(product);
+        Product guardado = productRepository.save(product);
+        stockSync.desdeProducto(guardado);
+        return guardado;
     }
 }
