@@ -3,37 +3,71 @@ package com.gestion.inventory.sevice;
 import com.gestion.inventory.domain.Onu;
 import com.gestion.inventory.domain.OnuMovimiento;
 import com.gestion.inventory.domain.dtorecust.OnuOperacionRequest;
+import com.gestion.inventory.domain.ClienteOnu;
+import com.gestion.inventory.repository.ClienteOnuRepository;
 import com.gestion.inventory.repository.OnuMovimientoRepository;
 import com.gestion.inventory.repository.OnuRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Operaciones por lote sobre ONUs. Todo se valida antes de cambiar nada y se guarda
- * en una sola transacción: si una ONU no cumple, no se modifica ninguna.
- */
 @Service
 public class OnuOperacionService {
 
     private static final Set<String> ESTADOS_DIAGNOSTICO = Set.of("Disponible", "Defectuoso", "Observado", "Mantenimiento");
 
     private final OnuRepository onuRepository;
-    private final OnuMovimientoRepository movimientoRepository;
+    private static final Set<String> CARGOS = Set.of("Técnico", "Administrador", "Encargado");
 
-    public OnuOperacionService(OnuRepository onuRepository, OnuMovimientoRepository movimientoRepository) {
+    private final OnuMovimientoRepository movimientoRepository;
+    private final ClienteOnuRepository clienteOnuRepository;
+    private final OnuStockService stockService;
+
+    public OnuOperacionService(OnuRepository onuRepository, OnuMovimientoRepository movimientoRepository,
+                               ClienteOnuRepository clienteOnuRepository, OnuStockService stockService) {
         this.onuRepository = onuRepository;
         this.movimientoRepository = movimientoRepository;
+        this.clienteOnuRepository = clienteOnuRepository;
+        this.stockService = stockService;
     }
 
     @Transactional
     public List<OnuMovimiento> asignar(OnuOperacionRequest req) {
-        String usuario = exigirTexto(req.getUsuario(), "Selecciona el usuario al que se asigna");
+        String tipoDestino = req.getTipoDestino() == null || req.getTipoDestino().isBlank()
+                ? "USUARIO" : req.getTipoDestino().trim().toUpperCase();
+        String tipoPortador;
+        String nombre;
+        Long contratoCliente = null;
+        switch (tipoDestino) {
+            case "USUARIO" -> {
+                nombre = exigirTexto(req.getUsuario(), "Selecciona el usuario al que se asigna");
+                tipoPortador = exigirTexto(req.getCargo(), "Indica si es Técnico, Administrador o Encargado");
+                if (!CARGOS.contains(tipoPortador)) {
+                    throw new IllegalArgumentException("Cargo no válido: " + tipoPortador);
+                }
+            }
+            case "EMPRESA" -> {
+                nombre = exigirTexto(req.getEmpresa(), "Escribe el nombre de la empresa");
+                tipoPortador = "Empresa";
+            }
+            case "CLIENTE" -> {
+                if (req.getClienteId() == null) throw new IllegalArgumentException("Selecciona el cliente");
+                ClienteOnu c = clienteOnuRepository.findById(req.getClienteId())
+                        .orElseThrow(() -> new IllegalArgumentException("No existe el cliente seleccionado"));
+                nombre = c.getNombre();
+                tipoPortador = "Cliente";
+                contratoCliente = c.getNumeroContrato() != null ? c.getNumeroContrato() : req.getContrato();
+            }
+            default -> throw new IllegalArgumentException("Tipo de destino no válido: " + tipoDestino);
+        }
+        String usuario = nombre;
+        // Entregada a un cliente = ONU instalada; a un usuario o empresa = asignada
+        String estadoFinal = "CLIENTE".equals(tipoDestino) ? "Instalado" : "Asignada";
+        String destinoTexto = tipoPortador + ": " + nombre;
         List<OnuOperacionRequest.Item> items = exigirItems(req);
 
         List<Onu> onus = new ArrayList<>();
@@ -53,14 +87,17 @@ public class OnuOperacionService {
             String anterior = onu.getEstado();
             String almacenOrigen = onu.getAlmacen();
 
-            onu.setEstado("Asignada");
-            onu.setTipoPortador("Usuario");
+            onu.setEstado(estadoFinal);
+            onu.setTipoPortador(tipoPortador);
             onu.setPortador(usuario);
             onu.setAlmacen(null);
+            if (contratoCliente != null) onu.setContrato(contratoCliente);
             onuRepository.save(onu);
+            // La ONU sale del almacén: baja del stock del producto
+            stockService.restar(onu.getMarca());
 
             resultado.add(movimientoRepository.save(
-                    movimiento(req, onu, "ASIGNACION", anterior, "Asignada", usuario, almacenOrigen,
+                    movimiento(req, onu, "ASIGNACION", anterior, estadoFinal, destinoTexto, almacenOrigen,
                             unir(req.getObservaciones(), items.get(i).getObservaciones()))));
         }
         return resultado;
@@ -68,17 +105,19 @@ public class OnuOperacionService {
 
     @Transactional
     public List<OnuMovimiento> recojo(OnuOperacionRequest req) {
-        String usuario = exigirTexto(req.getUsuario(), "Selecciona el usuario que recoge");
+        String usuario = exigirTexto(req.getUsuario(), "Selecciona el técnico que recoge");
         List<OnuOperacionRequest.Item> items = exigirItems(req);
 
         List<Onu> onus = new ArrayList<>();
         List<String> errores = new ArrayList<>();
         for (OnuOperacionRequest.Item item : items) {
             Onu onu = buscar(item.getOnuId());
-            if (onu.getContrato() == null) {
-                errores.add(etiqueta(onu) + " no tiene contrato; no corresponde un recojo");
-            } else if ("Recogido".equalsIgnoreCase(texto(onu.getEstado()))) {
+            if ("Recogido".equalsIgnoreCase(texto(onu.getEstado()))) {
                 errores.add(etiqueta(onu) + " ya fue recogida");
+            } else if (!"Cliente".equalsIgnoreCase(texto(onu.getTipoPortador()))
+                    || !("Instalado".equalsIgnoreCase(texto(onu.getEstado()))
+                    || "Asignada".equalsIgnoreCase(texto(onu.getEstado())))) {
+                errores.add(etiqueta(onu) + " no está asignada a un cliente; solo se recogen ONUs de clientes");
             }
             onus.add(onu);
         }
@@ -91,14 +130,14 @@ public class OnuOperacionService {
             Long contrato = onu.getContrato();
 
             onu.setEstado("Recogido");
-            onu.setTipoPortador("Usuario");
+            onu.setTipoPortador("Técnico");
             onu.setPortador(usuario);
             onu.setContrato(null);
             onuRepository.save(onu);
 
             resultado.add(movimientoRepository.save(
                     movimiento(req, onu, "RECOJO", anterior, "Recogido", usuario, null,
-                            unir("Contrato N° " + contrato, unir(req.getObservaciones(), items.get(i).getObservaciones())))));
+                            unir(contrato == null ? null : "Contrato N° " + contrato, unir(req.getObservaciones(), items.get(i).getObservaciones())))));
         }
         return resultado;
     }
@@ -131,6 +170,11 @@ public class OnuOperacionService {
             onu.setPortador(almacen);
         }
         onuRepository.save(onu);
+        if (estadoNuevo.equals("Disponible") && !OnuStockService.disponible(anterior)) {
+            // Vuelve al almacén: sube el stock del producto
+            stockService.vincular(onu, stockService.sumar(onu.getMarca()));
+            onuRepository.save(onu);
+        }
 
         return movimientoRepository.save(
                 movimiento(req, onu, "DIAGNOSTICO", anterior, estadoNuevo, null, almacen.isEmpty() ? null : almacen, diagnostico));
@@ -201,6 +245,7 @@ public class OnuOperacionService {
         m.setEstadoNuevo(nuevo);
         m.setUsuario(usuario);
         m.setAlmacen(almacen);
+        m.setCargo("RECOJO".equals(tipo) ? "Técnico" : req.getCargo());
         m.setDetalle(detalle);
         return m;
     }

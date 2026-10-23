@@ -18,6 +18,7 @@ public class UpdateOnu {
     public Onu execute(Long id, OnuRequest onuRequest){
         Onu onuUpdate=onuservice.getById(id);
         String marcaAnterior = onuUpdate.getMarca();
+        boolean eraDisponible = OnuStockService.disponible(onuUpdate.getEstado());
         onuUpdate.setMarca(onuRequest.getMarca());
         onuUpdate.setModelo(onuRequest.getModelo());
         onuUpdate.setSerial(onuRequest.getSerial());
@@ -29,7 +30,15 @@ public class UpdateOnu {
         onuUpdate.setTipoPortador(onuRequest.getTipoPortador());
         onuUpdate.setPortador(onuRequest.getPortador());
         onuUpdate.setAlmacen(onuRequest.getAlmacen());
-        stockService.vincular(onuUpdate, stockService.cambioMarca(marcaAnterior, onuRequest.getMarca()));
+        boolean esDisponible = OnuStockService.disponible(onuUpdate.getEstado());
+        boolean mismaMarca = (marcaAnterior == null ? "" : marcaAnterior.trim())
+                .equalsIgnoreCase(onuRequest.getMarca() == null ? "" : onuRequest.getMarca().trim());
+        if (eraDisponible != esDisponible || !mismaMarca) {
+            if (eraDisponible) stockService.restar(marcaAnterior);
+            stockService.vincular(onuUpdate, esDisponible
+                    ? stockService.sumar(onuUpdate.getMarca())
+                    : stockService.asegurar(onuUpdate.getMarca()));
+        }
         return onuservice.save(onuUpdate);
     }
 }

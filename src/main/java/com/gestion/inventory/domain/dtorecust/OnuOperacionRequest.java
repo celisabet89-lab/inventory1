@@ -12,13 +12,17 @@ public class OnuOperacionRequest {
 
     LocalDate fecha;
     String usuario;
+    String tipoDestino;
+    String cargo;
+    String empresa;
+    Long clienteId;
+    Long contrato;
     String observaciones;
     List<Item> items;
     Long onuId;
     String estadoNuevo;
     String diagnostico;
     String almacen;
-
     @Getter
     @Setter
     public static class Item {

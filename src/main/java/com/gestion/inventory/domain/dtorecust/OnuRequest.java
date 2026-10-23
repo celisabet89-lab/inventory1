@@ -17,4 +17,6 @@ public class OnuRequest {
     String tipoPortador;
     String portador;
     String almacen;
+    String registradoPor;
+    String cargoRegistro;
 }

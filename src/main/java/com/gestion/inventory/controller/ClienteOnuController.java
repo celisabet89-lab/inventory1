@@ -22,13 +22,10 @@ public class ClienteOnuController {
 
     @GetMapping
     public List<ClienteOnu> getAll() { return repo.findAll(); }
-
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Long id) {
-        return repo.findById(id).<ResponseEntity<?>>map(ResponseEntity::ok)
+    public ResponseEntity<?> getById(@PathVariable Long id) {return repo.findById(id).<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElseGet(() -> error("Cliente no encontrado"));
     }
-
     @PostMapping
     public ResponseEntity<?> save(@RequestBody ClienteOnu body) {
         String err = validar(body, null);
@@ -37,7 +34,6 @@ public class ClienteOnuController {
         body.setTipoCliente(resolverTipo(body.getTipoCliente()));
         return ResponseEntity.ok(repo.save(body));
     }
-
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody ClienteOnu body) {
         ClienteOnu c = repo.findById(id).orElse(null);
@@ -54,13 +50,8 @@ public class ClienteOnuController {
         c.setTipoCliente(resolverTipo(body.getTipoCliente()));
         return ResponseEntity.ok(repo.save(c));
     }
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        repo.deleteById(id);
-        return ResponseEntity.ok().build();
-    }
-
+    public ResponseEntity<?> delete(@PathVariable Long id) {repo.deleteById(id);return ResponseEntity.ok().build();}
     private String validar(ClienteOnu b, Long idActual) {
         if (b.getNombre() == null || b.getNombre().isBlank()) return "El nombre es obligatorio";
         if (b.getNumeroContrato() != null) {
@@ -71,12 +62,10 @@ public class ClienteOnuController {
         }
         return null;
     }
-
     private TipoClienteOnu resolverTipo(TipoClienteOnu t) {
         if (t == null || t.getId() == null) return null;
         return tipos.findById(t.getId()).orElse(null);
     }
-
     private ResponseEntity<?> error(String msg) {
         return ResponseEntity.badRequest().body(Map.of("message", msg));
     }

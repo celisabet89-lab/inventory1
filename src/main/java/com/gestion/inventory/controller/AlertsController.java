@@ -25,28 +25,20 @@ public class AlertsController {
 
     @GetMapping
     public List<Alert> getAll() { return getAllAlert.execute(); }
-
     @GetMapping("/{idAlert}")
     public Alert getById(@PathVariable Long idAlert) { return getAlert.execute(idAlert); }
-
     @PostMapping
     public Alert save(@RequestBody AlertRequest alertRequest) { return createAlert.execute(alertRequest); }
-
     @PutMapping("/{idAlert}")
     public Alert update(@PathVariable Long idAlert, @RequestBody AlertRequest alertRequest) {
         return updateAlert.execute(idAlert, alertRequest);
     }
-
     @DeleteMapping("/{idAlert}")
     public void deleteById(@PathVariable Long idAlert) { deleteAlert.execute(idAlert); }
-
     @GetMapping("/check-stock")
     public List<Alert> checkStockGet()  { return checkStockAlerts.execute(); }
-
     @PostMapping("/check-stock")
     public List<Alert> checkStockPost() { return checkStockAlerts.execute(); }
-
-    // NUEVO: enviar pedido al proveedor por email
     @PostMapping("/order-supplier")
     public Map<String, Object> orderSupplier(@RequestBody SupplierOrderRequest req) {
         return sendSupplierOrder.execute(req);

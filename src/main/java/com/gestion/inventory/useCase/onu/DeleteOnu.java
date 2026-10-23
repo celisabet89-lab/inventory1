@@ -16,7 +16,7 @@ public class DeleteOnu {
     @Transactional
     public void execute(Long idOnu){
         com.gestion.inventory.domain.Onu onu = onuService.getById(idOnu);
-        if (onu != null) stockService.restar(onu.getMarca());
+        if (onu != null && OnuStockService.disponible(onu.getEstado())) stockService.restar(onu.getMarca());
         onuService.deleteById(idOnu);
     }
 }

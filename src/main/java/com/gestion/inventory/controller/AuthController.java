@@ -14,9 +14,7 @@ import java.util.List;
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
-
     @Autowired private IUserService userService;
-
     @PostMapping("/login")
     public User login(@RequestBody UserRequest req) {
         List<User> todos = userService.getAll();
@@ -31,7 +29,6 @@ public class AuthController {
         String stored = user.getPassword();
         String input  = req.getPassword();
 
-        // Comparación directa en texto plano — sin BCrypt
         if (stored == null || !stored.equals(input))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Contraseña incorrecta");
 

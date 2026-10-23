@@ -13,12 +13,6 @@ import com.gestion.inventory.repository.AlertRepository;
 import com.gestion.inventory.repository.ExistingRepository;
 import com.gestion.inventory.repository.ProductRepository;
 
-/**
- * Mantiene sincronizados Producto (unidad), Stock (Existing) y Alertas.
- * - Producto -> Stock: el stock actual toma la cantidad del producto.
- * - Stock -> Producto: la cantidad del producto toma el stock actual.
- * - Alertas: si el stock supera el mínimo, las alertas PENDIENTES pasan a GESTIONADA.
- */
 @Service
 public class StockSyncService {
 
@@ -28,7 +22,6 @@ public class StockSyncService {
     @Autowired ProductRepository productRepository;
     @Autowired AlertRepository alertRepository;
 
-    /** Copia la cantidad del producto al stock (lo crea si no existe) y resuelve alertas. */
     @Transactional
     public Existing desdeProducto(Product producto) {
         if (producto == null || producto.getIdProducto() == null) return null;
@@ -45,7 +38,7 @@ public class StockSyncService {
         return stock;
     }
 
-    /** Copia el stock actual a la cantidad del producto y resuelve alertas. */
+
     @Transactional
     public void desdeStock(Existing stock) {
         if (stock == null) return;
@@ -57,7 +50,6 @@ public class StockSyncService {
         resolverAlertas(stock);
     }
 
-    /** Si el stock está por encima del mínimo, marca como GESTIONADA las alertas pendientes del producto. */
     @Transactional
     public void resolverAlertas(Existing stock) {
         if (stock == null || stock.getProduct() == null) return;

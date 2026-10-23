@@ -20,18 +20,14 @@ public class CategoriaController {
 
     @GetMapping
     public List<Categoria> getAll() { return getAllCategoria.execute(); }
-
     @GetMapping("/{idCategoria}")
     public Categoria getById(@PathVariable Long idCategoria) { return getCategoria.execute(idCategoria); }
-
     @PostMapping
     public Categoria save(@RequestBody CategoriaRequest categoriaRequest) { return createCategoria.execute(categoriaRequest); }
-
     @PutMapping("/{idCategoria}")
     public Categoria update(@PathVariable Long idCategoria, @RequestBody CategoriaRequest categoriaRequest) {
         return updateCategoria.execute(idCategoria, categoriaRequest);
     }
-
     @DeleteMapping("/{idCategoria}")
     public void delete(@PathVariable Long idCategoria) { deleteCategoria.execute(idCategoria); }
 }

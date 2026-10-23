@@ -20,18 +20,14 @@ public class ClienteController {
 
     @GetMapping
     public List<Cliente> getAll() { return getAllCliente.execute(); }
-
     @GetMapping("/{idCliente}")
     public Cliente getById(@PathVariable Long idCliente) { return getCliente.execute(idCliente); }
-
     @PostMapping
     public Cliente save(@RequestBody ClienteRequest req) { return createCliente.execute(req); }
-
     @PutMapping("/{idCliente}")
     public Cliente update(@PathVariable Long idCliente, @RequestBody ClienteRequest req) {
         return updateCliente.execute(idCliente, req);
     }
-
     @DeleteMapping("/{idCliente}")
     public void deleteById(@PathVariable Long idCliente) { deleteCliente.execute(idCliente); }
 }

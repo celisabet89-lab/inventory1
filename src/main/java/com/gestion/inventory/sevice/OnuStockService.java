@@ -13,10 +13,6 @@ import com.gestion.inventory.repository.CategoriaRepository;
 import com.gestion.inventory.repository.ProductRepository;
 import com.gestion.inventory.repository.UnidadMedidaRepository;
 
-/**
- * Mantiene el stock del producto (ONU/router) sincronizado con las ONUs registradas.
- * El producto se busca por nombre (articulo) igual a la marca de la ONU.
- */
 @Service
 public class OnuStockService {
 
@@ -33,7 +29,25 @@ public class OnuStockService {
         return s == null ? "" : s.trim();
     }
 
-    /** Suma 1 al producto de la marca; si no existe lo crea (nombre, cantidad, categoria y unidad). */
+    public static boolean disponible(String estado) {
+        return estado != null && estado.trim().equalsIgnoreCase("Disponible");
+    }
+
+    public Product asegurar(String marca) {
+        String nombre = limpiar(marca);
+        if (nombre.isEmpty()) return null;
+        Product existente = productRepository.findFirstByArticuloIgnoreCase(nombre).orElse(null);
+        if (existente != null) return existente;
+        Product p = new Product();
+        p.setArticulo(nombre);
+        p.setDescripcion(nombre);
+        p.setUnidad(0);
+        p.setPrecio(BigDecimal.ZERO);
+        p.setCategoria(categoria());
+        p.setUnidadMedida(unidad());
+        return productRepository.save(p);
+    }
+
     public Product sumar(String marca) {
         String nombre = limpiar(marca);
         if (nombre.isEmpty()) return null;
@@ -53,7 +67,6 @@ public class OnuStockService {
         return guardado;
     }
 
-    /** Resta 1 (sin bajar de 0) al producto de la marca, si existe. */
     public void restar(String marca) {
         String nombre = limpiar(marca);
         if (nombre.isEmpty()) return;
@@ -62,13 +75,6 @@ public class OnuStockService {
             p.setUnidad(Math.max(0, actual - 1));
             stockSync.desdeProducto(productRepository.save(p));
         });
-    }
-
-    /** Si la marca cambió al editar una ONU, mueve la cantidad de un producto al otro. */
-    public Product cambioMarca(String anterior, String nueva) {
-        if (limpiar(anterior).equalsIgnoreCase(limpiar(nueva))) return null;
-        restar(anterior);
-        return sumar(nueva);
     }
 
     private Categoria categoria() {

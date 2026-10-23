@@ -28,21 +28,16 @@ public class AssignmentController {
         return getAllAssignment.execute();
     }
     @GetMapping("/{idAssignment}")
-    public Assignment getById(@PathVariable("idAssignment") Long idAssignment) {
-        return getAssignment.execute(idAssignment);
-    }
+    public Assignment getById(@PathVariable("idAssignment") Long idAssignment) {return getAssignment.execute(idAssignment);}
     @PostMapping
     public Assignment save(@RequestBody AssignmentRequets assignmentRequets) {
         return createAssignment.execute(assignmentRequets);
     }
-
     @PutMapping("/{idAssignment}")
     public Assignment update(@PathVariable Long idAssignment, @RequestBody AssignmentRequets assignmentRequets) {
         return updateAssignment.execute(idAssignment, assignmentRequets);
     }
-
     @DeleteMapping("/{idAssignment}")
     public void deleteById(@PathVariable Long idAssignment) {
         deleteAssignment.execute(idAssignment);
-    }
-}
+    }}
