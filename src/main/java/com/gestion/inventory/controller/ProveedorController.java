@@ -2,6 +2,7 @@ package com.gestion.inventory.controller;
 
 import com.gestion.inventory.domain.Proveedor;
 import com.gestion.inventory.domain.dtorecust.ProveedorRequest;
+import com.gestion.inventory.repository.ProveedorRepository;
 import com.gestion.inventory.useCase.proveedor.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,25 +15,33 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/proveedor")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class ProveedorController {
 
     @Autowired
     CreateProveedor createProveedor;
-
     @Autowired
     DeleteProveedor deleteProveedor;
-
     @Autowired
     GetAllProveedor getAllProveedor;
-
     @Autowired
     GetProveedor getProveedor;
-
     @Autowired
     UpdateProveedor updateProveedor;
+    @Autowired
+    ProveedorRepository proveedorRepo;
 
-
+    @PatchMapping("/{idProveedor}/estado")
+    public ResponseEntity<?> cambiarEstado(@PathVariable Long idProveedor, @RequestBody Map<String, String> body) {
+        String estado = body.get("estado") == null ? "" : body.get("estado").trim().toUpperCase();
+        if (!estado.equals("ACTIVO") && !estado.equals("INACTIVO")) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Estado inválido"));
+        }
+        return proveedorRepo.findById(idProveedor).<ResponseEntity<?>>map(p -> {
+            p.setEstado(estado);
+            return ResponseEntity.ok(proveedorRepo.save(p));
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Proveedor no encontrado")));
+    }
 
     @GetMapping
     public List<Proveedor> getAll() {

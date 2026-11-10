@@ -12,24 +12,24 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class LugarVentaController {
 
-    @Autowired private CreateLugarVenta  createLugarVenta;
-    @Autowired private UpdateLugarVenta  updateLugarVenta;
-    @Autowired private GetAllLugarVenta  getAllLugarVenta;
-    @Autowired private GetLugarVenta     getLugarVenta;
-    @Autowired private DeleteLugarVenta  deleteLugarVenta;
-
+    @Autowired
+    CreateLugarVenta  createLugarVenta;
+    @Autowired
+    UpdateLugarVenta  updateLugarVenta;
+    @Autowired
+    GetAllLugarVenta  getAllLugarVenta;
+    @Autowired
+    GetLugarVenta     getLugarVenta;
+    @Autowired
+    DeleteLugarVenta  deleteLugarVenta;
     @GetMapping
     public List<LugarVenta> getAll() { return getAllLugarVenta.execute(); }
-
-    @GetMapping("/{idLugarVentaLugarVenta}")
+    @GetMapping("/{idLugarVenta}")
     public LugarVenta getById(@PathVariable Long idLugarVenta) { return getLugarVenta.execute(idLugarVenta); }
-
     @PostMapping
     public LugarVenta create(@RequestBody LugarventaRequest req) { return createLugarVenta.execute(req); }
-
     @PutMapping("/{idLugarVenta}")
     public LugarVenta update(@PathVariable Long idLugarVenta, @RequestBody LugarventaRequest req) { return updateLugarVenta.execute(idLugarVenta, req); }
-
     @DeleteMapping("/{idLugarVenta}")
     public void deleteById(@PathVariable Long idLugarVenta) { deleteLugarVenta.execute(idLugarVenta); }
 }

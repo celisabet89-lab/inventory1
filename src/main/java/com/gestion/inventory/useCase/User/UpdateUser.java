@@ -8,6 +8,7 @@ import com.gestion.inventory.repository.ProfileRepository;
 import com.gestion.inventory.repository.RolRepository;
 import com.gestion.inventory.sevice.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +16,7 @@ public class UpdateUser {
     @Autowired IUserService userService;
     @Autowired ProfileRepository profileRepository;
     @Autowired RolRepository rolRepository;
+    @Autowired PasswordEncoder passwordEncoder;
 
     public User execute(Long id, UserRequest r) {
         User user = userService.getById(id);
@@ -22,7 +24,7 @@ public class UpdateUser {
         // Actualizar credenciales
         if (r.getEmail() != null) user.setEmail(r.getEmail());
         if (r.getPassword() != null && !r.getPassword().isEmpty())
-            user.setPassword(r.getPassword());
+            user.setPassword(passwordEncoder.encode(r.getPassword()));
 
         // Buscar Rol
         Rol rol = user.getRol();

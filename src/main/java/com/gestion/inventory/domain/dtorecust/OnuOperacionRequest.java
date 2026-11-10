@@ -23,6 +23,8 @@ public class OnuOperacionRequest {
     String estadoNuevo;
     String diagnostico;
     String almacen;
+    /** Fotos de evidencia (data URL JPEG/PNG), solo al instalar en un cliente. */
+    List<String> fotos;
     @Getter
     @Setter
     public static class Item {

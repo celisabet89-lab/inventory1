@@ -2,11 +2,9 @@ package com.gestion.inventory.controller;
 
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import com.gestion.inventory.domain.ClienteOnu;
 import com.gestion.inventory.domain.TipoClienteOnu;
 import com.gestion.inventory.repository.ClienteOnuRepository;
@@ -16,15 +14,13 @@ import com.gestion.inventory.repository.TipoClienteOnuRepository;
 @RequestMapping("/api/cliente-onu")
 @CrossOrigin(origins = "*")
 public class ClienteOnuController {
-
     @Autowired ClienteOnuRepository repo;
     @Autowired TipoClienteOnuRepository tipos;
-
     @GetMapping
     public List<ClienteOnu> getAll() { return repo.findAll(); }
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {return repo.findById(id).<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() -> error("Cliente no encontrado"));
+            .orElseGet(() -> error("Cliente no encontrado"));
     }
     @PostMapping
     public ResponseEntity<?> save(@RequestBody ClienteOnu body) {
@@ -48,6 +44,15 @@ public class ClienteOnuController {
         c.setFechaNacimiento(body.getFechaNacimiento());
         c.setNumeroContrato(body.getNumeroContrato());
         c.setTipoCliente(resolverTipo(body.getTipoCliente()));
+        return ResponseEntity.ok(repo.save(c));
+    }
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<?> cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String estado = body.get("estado") == null ? "" : body.get("estado").trim().toUpperCase();
+        if (!estado.equals("ACTIVO") && !estado.equals("INACTIVO")) return error("Estado inválido");
+        ClienteOnu c = repo.findById(id).orElse(null);
+        if (c == null) return error("Cliente no encontrado");
+        c.setEstado(estado);
         return ResponseEntity.ok(repo.save(c));
     }
     @DeleteMapping("/{id}")

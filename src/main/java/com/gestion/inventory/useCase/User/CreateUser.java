@@ -8,6 +8,7 @@ import com.gestion.inventory.repository.ProfileRepository;
 import com.gestion.inventory.repository.RolRepository;
 import com.gestion.inventory.sevice.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +16,7 @@ public class CreateUser {
     @Autowired IUserService userService;
     @Autowired ProfileRepository profileRepository;
     @Autowired RolRepository rolRepository;
+    @Autowired PasswordEncoder passwordEncoder;
 
     public User execute(UserRequest r) {
         // Buscar Rol primero
@@ -33,7 +35,7 @@ public class CreateUser {
 
         User user = new User();
         user.setEmail(r.getEmail());
-        user.setPassword(r.getPassword());
+        user.setPassword(passwordEncoder.encode(r.getPassword()));
         user.setProfile(profile);
         user.setRol(rol);
         return userService.save(user);

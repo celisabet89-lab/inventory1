@@ -39,6 +39,10 @@ public class OnuMovimiento {
     @Column(columnDefinition = "TEXT")
     private String detalle;
 
+    /** Fotos de evidencia de la instalación (arreglo JSON de imágenes en base64). */
+    @Column(columnDefinition = "LONGTEXT")
+    private String fotos;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "onu_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

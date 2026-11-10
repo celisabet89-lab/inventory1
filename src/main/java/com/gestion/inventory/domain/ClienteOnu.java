@@ -1,7 +1,6 @@
 package com.gestion.inventory.domain;
 
 import java.time.LocalDate;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,11 +10,9 @@ import lombok.Setter;
 @Setter
 @Table(name = "cliente_onu")
 public class ClienteOnu {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-
     String nombre;
     String ci;
     String celular;
@@ -24,6 +21,9 @@ public class ClienteOnu {
     String ubicacion;
     LocalDate fechaNacimiento;
     Long numeroContrato;
+
+    @Column(length = 10)
+    String estado = "ACTIVO";
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tipo_cliente_id")
